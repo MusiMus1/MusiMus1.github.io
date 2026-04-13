@@ -13,6 +13,7 @@ let obstacleOptions = [
     1, // Breakable Blocks
     2, // Enemy
 ]
+let startY;
 
 // Player Settings
 const const_multiplier = 1.5;
@@ -201,6 +202,10 @@ export default class MainScene extends Phaser.Scene {
         this.spinKeys = this.input.keyboard.addKeys('DOWN,S');
 
         // Mobile Input
+        this.input.on('pointerdown', (pointer)=>{
+            startY = pointer.y
+        })
+
         this.input.on('pointermove', (pointer)=>{
             if (pointer.isDown){
                 let currentDistance = pointer.y - startY;
@@ -212,6 +217,7 @@ export default class MainScene extends Phaser.Scene {
             }
         })
 
+        // Groups
         this.spikeGroup =  this.physics.add.group({
             classType: Spike,
             runChildUpdate: true
