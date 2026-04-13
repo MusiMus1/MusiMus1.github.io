@@ -205,14 +205,16 @@ export default class MainScene extends Phaser.Scene {
         this.input.on('pointerdown', (pointer)=>{
             startY = pointer.y
         })
-
         this.input.on('pointermove', (pointer)=>{
-            if (pointer.isDown && !Settings.gameOver){
+            if (pointer.isDown && !Settings.gameOver && startY > 0){
                 let currentDistance = pointer.y - startY;
-                if (currentDistance > 50 && currentDistance < 60) {
+                console.log(currentDistance);
+                if (currentDistance > 40) {
                     this.spin();
-                } else if (currentDistance < -50 && currentDistance < 60){
+                    startY = 0;
+                } else if (currentDistance < -40){
                     this.jump();
+                    startY = 0;
                 }
             }
         })
