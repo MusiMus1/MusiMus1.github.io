@@ -200,6 +200,18 @@ export default class MainScene extends Phaser.Scene {
         this.jumpKeys = this.input.keyboard.addKeys('UP,W,SPACE');
         this.spinKeys = this.input.keyboard.addKeys('DOWN,S');
 
+        // Mobile Input
+        this.input.on('pointermove', (pointer)=>{
+            if (pointer.isDown){
+                let currentDistance = pointer.y - startY;
+                if (currentDistance > 50) {
+                    this.spin();
+                } else if (currentDistance < -50){
+                    this.jump();
+                }
+            }
+        })
+
         this.spikeGroup =  this.physics.add.group({
             classType: Spike,
             runChildUpdate: true
@@ -219,7 +231,7 @@ export default class MainScene extends Phaser.Scene {
             classType: Fruit,
             runChildUpdate: true
         })
-
+    
         // Enemy Overlap
         this.physics.add.overlap(this.enemyGroup, this.player, (playerInstance, enemyInstance) => {
             if (this.isPlaying(this.player, "player_spin")){
@@ -285,20 +297,14 @@ export default class MainScene extends Phaser.Scene {
         this.player.body.velocity.y += gravity * gravityMultiplier * !isGrounded;
         this.player.body.width = (this.isPlaying(this.player, "player_spin"))? spinBodySize : normalBodySize;
         
-        if (this.actionJustDown(jumpAction) && isGrounded){
-            this.sound.play('player_jump');
-            console.log('oi');
-            this.player.setVelocityY(-jumpForce);
-            isGrounded = false;
-            alreadyLanded = false;
+        if (this.actionJustDown(jumpAction)){
+            this.jump();
         }
 
         this.anim_manager();
 
         if (this.actionJustDown(spinAction)){
-            this.sound.play('player_spin');
-            this.player.setVelocityY(jumpForce * !isGrounded);
-            this.player.play('player_spin').chain('player_fall');
+            this.spin();
         }
 
         this.mountains.update(time, delta);
@@ -334,6 +340,21 @@ export default class MainScene extends Phaser.Scene {
 
     actionJustDown(action){
         return action.some(key => Phaser.Input.Keyboard.JustDown(key));
+    }
+    
+    jump(){
+        if(!isGrounded) return;
+        this.sound.play('player_jump');
+        console.log('oi');
+        this.player.setVelocityY(-jumpForce);
+        isGrounded = false;
+        alreadyLanded = false;
+    }
+
+    spin(){
+        this.sound.play('player_spin');
+        this.player.setVelocityY(jumpForce * !isGrounded);
+        this.player.play('player_spin').chain('player_fall');
     }
 
     addObstacle(incrementSpeed = true){
@@ -420,6 +441,10 @@ const config = {
     type: Phaser.AUTO,
     width: 800,
     height: 600,
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+    },
     backgroundColor: '#87CEEB',
     physics: {
         default: 'arcade',
